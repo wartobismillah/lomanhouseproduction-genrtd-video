@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MVC Configurator — v31</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #080809;
+  --s1:       #0f0f12;
+  --s2:       #161619;
+  --s3:       #1e1e24;
+  --border:   #2c2c38;
+  --border2:  #3a3a50;
+  --amber:    #f59e0b;
+  --amber2:   #fbbf24;
+  --amber-dim:#7c5100;
+  --text:     #e8e8ec;
+  --dim:      #9090a8;
+  --muted:    #555568;
+  --danger:   #ef4444;
+  --ok:       #22c55e;
+  --blue:     #60a5fa;
+  --rad:      6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  font-size:15px;
+  line-height:1.5;
+  min-height:100vh;
+  padding-bottom:120px;
+}
+
+/* ---- NOISE OVERLAY ---- */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.6;
+}
+
+/* ---- HEADER ---- */
+header{
+  background:linear-gradient(180deg,#0f0e1a 0%,var(--bg) 100%);
+  border-bottom:1px solid var(--border);
+  padding:24px 32px 20px;
+  position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(12px);
+}
+.header-inner{
+  max-width:860px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:26px;letter-spacing:3px;
+  color:var(--amber);
+  text-shadow:0 0 20px rgba(245,158,11,.4);
+}
+.logo span{color:var(--dim);font-size:14px;letter-spacing:1px;font-family:'Rajdhani',sans-serif;display:block;margin-top:-4px}
+.header-badge{
+  background:var(--s3);border:1px solid var(--border2);
+  border-radius:4px;padding:4px 10px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--dim);letter-spacing:1px;
+}
+
+/* ---- LAYOUT ---- */
+main{max-width:860px;margin:32px auto;padding:0 24px}
+
+/* ---- SECTION ---- */
+.section{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--rad);
+  margin-bottom:16px;
+  overflow:hidden;
+  transition:border-color .2s;
+}
+.section:hover{border-color:var(--border2)}
+.section.active{border-color:var(--amber-dim)}
+.sec-head{
+  padding:14px 20px;
+  display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid var(--border);
+  background:var(--s2);
+  cursor:default;
+}
+.sec-icon{
+  width:32px;height:32px;flex-shrink:0;
+  background:var(--s3);border:1px solid var(--border2);
+  border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;
+}
+.sec-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:17px;letter-spacing:2px;color:var(--text);
+}
+.sec-badge{
+  margin-left:auto;
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--amber);background:rgba(245,158,11,.1);
+  border:1px solid rgba(245,158,11,.25);
+  border-radius:3px;padding:2px 7px;letter-spacing:.5px;
+  white-space:nowrap;
+}
+.sec-body{padding:20px}
+
+/* ---- FORM ELEMENTS ---- */
+label.field-label{
+  display:block;font-size:12px;letter-spacing:1.5px;
+  color:var(--dim);text-transform:uppercase;margin-bottom:6px;
+}
+input[type=text],input[type=number],select{
+  width:100%;background:var(--s3);
+  border:1px solid var(--border2);border-radius:var(--rad);
+  color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:13px;
+  padding:10px 14px;
+  outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+input[type=text]:focus,input[type=number]:focus,select:focus{
+  border-color:var(--amber);
+  box-shadow:0 0 0 3px rgba(245,158,11,.12);
+}
+input[type=text]::placeholder{color:var(--muted)}
+select option{background:var(--s3)}
+
+/* radio / checkbox pills */
+.pill-group{display:flex;gap:8px;flex-wrap:wrap}
+.pill{
+  position:relative;
+}
+.pill input[type=radio],.pill input[type=checkbox]{
+  position:absolute;opacity:0;width:0;height:0;
+}
+.pill label{
+  display:inline-block;cursor:pointer;
+  padding:7px 16px;
+  background:var(--s3);border:1px solid var(--border2);border-radius:4px;
+  font-size:13px;letter-spacing:.5px;
+  color:var(--dim);
+  transition:all .15s;
+  user-select:none;white-space:nowrap;
+}
+.pill input:checked + label{
+  background:rgba(245,158,11,.15);
+  border-color:var(--amber);
+  color:var(--amber2);
+}
+.pill label:hover{border-color:var(--amber-dim);color:var(--text)}
+
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.hint b{color:var(--dim)}
+
+/* row grids */
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:600px){.row2,.row3{grid-template-columns:1fr}}
+
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+
+/* sub-panel (conditional) */
+.sub-panel{
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:var(--rad);padding:16px;margin-top:12px;
+  display:none;
+}
+.sub-panel.show{display:block}
+
+/* ---- SUMMARY PANEL ---- */
+.summary-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:rgba(8,8,9,.95);
+  border-top:1px solid var(--border2);
+  backdrop-filter:blur(16px);
+  padding:12px 24px;
+}
+.summary-inner{
+  max-width:860px;margin:0 auto;
+  display:flex;align-items:center;gap:16px;
+}
+.summary-tags{
+  flex:1;display:flex;flex-wrap:wrap;gap:6px;
+}
+.stag{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  background:var(--s3);border:1px solid var(--border2);
+  border-radius:3px;padding:3px 8px;color:var(--dim);
+  letter-spacing:.3px;
+}
+.stag.hi{border-color:var(--amber-dim);color:var(--amber)}
+
+.gen-btn{
+  flex-shrink:0;
+  background:var(--amber);color:#000;
+  font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;
+  padding:10px 28px;border-radius:4px;border:none;
+  cursor:pointer;
+  transition:all .15s;
+  white-space:nowrap;
+}
+.gen-btn:hover{background:var(--amber2);box-shadow:0 0 20px rgba(245,158,11,.4)}
+.gen-btn:active{transform:scale(.97)}
+
+/* ---- ALERTS ---- */
+.alert{
+  padding:10px 14px;border-radius:var(--rad);
+  font-size:13px;margin-top:8px;
+  display:none;
+}
+.alert.danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+.alert.show{display:block}
+
+/* separator */
+.sep{height:1px;background:var(--border);margin:16px 0}
+
+/* range display */
+.range-display{
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:var(--amber);margin-top:6px;
+}
+
+/* number small */
+input[type=number]{width:100%}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      MVC Configurator
+      <span>MUSIC VIDEO COMPILER — Web UI v31</span>
+    </div>
+    <div class="header-badge">GENERATE .BAT</div>
+  </div>
+</header>
+
+<main>
+
+<!-- 1. ROOT FOLDER -->
+<div class="section active" id="sec-folder">
+  <div class="sec-head">
+    <div class="sec-icon">📁</div>
+    <div class="sec-title">Root Project Folder</div>
+    <div class="sec-badge" id="badge-folder">BELUM DIISI</div>
+  </div>
+  <div class="sec-body">
+    <div class="field">
+      <label class="field-label">Path Folder Project (Windows)</label>
+      <input type="text" id="rootPath" placeholder="contoh: D:\RenderProject\Milyarder" oninput="updateBadge('folder', this.value.trim() ? this.value.trim().split('\\').pop() || this.value : 'BELUM DIISI')">
+      <div class="hint">Folder ini harus berisi subfolder: <b>musik\</b>, <b>gambar\</b>, <b>efek\</b>, dan opsional <b>introready\</b><br>File .bat yang di-generate bisa diletakkan di mana saja — sudah otomatis <b>cd /d</b> ke path ini.</div>
+      <div class="alert danger" id="err-folder">⚠ Path folder wajib diisi sebelum generate.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. RESOLUSI -->
+<div class="section" id="sec-res">
+  <div class="sec-head">
+    <div class="sec-icon">🎬</div>
+    <div class="sec-title">Resolusi Output</div>
+    <div class="sec-badge" id="badge-res">FHD 1080p</div>
+  </div>
+  <div class="sec-body">
+    <div class="pill-group">
+      <div class="pill">
+        <input type="radio" name="res" id="res2" value="2" checked onchange="setRes(this)">
+        <label for="res2">FHD 1920×1080 — Preset: Fast</label>
+      </div>
+      <div class="pill">
+        <input type="radio" name="res" id="res1" value="1" onchange="setRes(this)">
+        <label for="res1">4K 3840×2160 — Preset: Medium</label>
+      </div>
+    </div>
+    <div class="hint">4K butuh RAM lebih besar. Script otomatis fallback ke FHD jika RAM kurang.</div>
+  </div>
+</div>
+
+<!-- 3. THUMBNAIL -->
+<div class="section" id="sec-thumb">
+  <div class="sec-head">
+    <div class="sec-icon">🖼️</div>
+    <div class="sec-title">Auto Thumbnail (3 dtk Awal)</div>
+    <div class="sec-badge" id="badge-thumb">NONE</div>
+  </div>
+  <div class="sec-body">
+    <div class="pill-group">
+      <div class="pill">
+        <input type="radio" name="thumb" id="thumb1" value="1" checked onchange="setThumb(1)">
+        <label for="thumb1">Tanpa Thumbnail</label>
+      </div>
+      <div class="pill">
+        <input type="radio" name="thumb" id="thumb2" value="2" onchange="setThumb(2)">
+        <label for="thumb2">Statis Polos</label>
+      </div>
+      <div class="pill">
+        <input type="radio" name="thumb" id="thumb3" value="3" onchange="setThumb(3)">
+        <label for="thumb3">Statis + Efek Layering</label>
+      </div>
+    </div>
+
+    <div class="sub-panel" id="panel-thumb-efx">
+      <label class="field-label">Efek untuk Thumbnail</label>
+      <div class="pill-group" style="margin-bottom:10px">
+        <div class="pill">
+          <input type="radio" name="thumb-efx" id="te-same" value="SAME" checked onchange="setThumbEfx('SAME')">
+          <label for="te-same">SAME — Sama dengan efek video utama</label>
+        </div>
+        <div class="pill">
+          <input type="radio" name="thumb-efx" id="te-custom" value="CUSTOM" onchange="setThumbEfx('CUSTOM')">
+          <label for="te-custom">ISOLASI — Pilih efek khusus thumbnail</label>
+        </div>
+      </div>
+      <div class="sub-panel show" id="panel-thumb-idx" style="display:none">
+        <label class="field-label">Index Efek Thumbnail (pisah koma, misal: 0,2,3)</label>
+        <input type="text" id="thumbEfxIdx" placeholder="contoh: 0  atau  0,2,3" oninput="updateSummary()">
+        <div class="hint">Index 0 = file pertama di folder efek\ (urutan alfabetik), 1 = kedua, dst.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. INTRO VIDEO -->
+<div class="section" id="sec-intro">
+  <div class="sec-head">
+    <div class="sec-icon">🎞️</div>
+    <div class="sec-title">Intro Video</div>
+    <div class="sec-badge" id="badge-intro">NONE</div>
+  </div>
+  <div class="sec-body">
+    <div class="pill-group">
+      <div class="pill">
+        <input type="radio" name="intro" id="intro0" value="NONE" checked onchange="setIntro('NONE')">
+        <label for="intro0">Tanpa Intro</label>
+      </div>
+      <div class="pill">
+        <input type="radio" name="intro" id="intro1" value="RANDOM" onchange="setIntro('RANDOM')">
+        <label for="intro1">Random (tiap video beda)</label>
+      </div>
+      <div class="pill">
+        <input type="radio" name="intro" id="intro2" value="STATIS" onchange="setIntro('STATIS')">
+        <label for="intro2">Statis (pilih 1 intro)</label>
+      </div>
+    </div>
+    <div class="sub-panel" id="panel-intro-idx">
+      <label class="field-label">Index Intro (0 = file pertama di introready\)</label>
+      <input type="number" id="introIdx" value="0" min="0" oninput="updateSummary()">
+    </div>
+    <div class="hint" style="margin-top:8px">File intro harus ada di subfolder <b>introready\</b>. Jika kosong, intro otomatis dinonaktifkan.</div>
+  </div>
+</div>
+
+<!-- 5. JUMLAH VIDEO -->
+<div class="section" id="sec-jumlah">
+  <div class="sec-head">
+    <div class="sec-icon">🔢</div>
+    <div class="sec-title">Jumlah Video Output</div>
+    <div class="sec-badge" id="badge-jumlah">5 VIDEO</div>
+  </div>
+  <div class="sec-body">
+    <div class="row2">
+      <div class="field">
+        <label class="field-label">Jumlah video yang di-render</label>
+        <input type="number" id="jumlahVideo" value="5" min="1" oninput="updateBadge('jumlah', this.value + ' VIDEO');updateSummary()">
+        <div class="hint">Maksimal = jumlah file gambar di folder gambar\</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. MODE DURASI -->
+<div class="section" id="sec-durasi">
+  <div class="sec-head">
+    <div class="sec-icon">⏱️</div>
+    <div class="sec-title">Mode Durasi Per Video</div>
+    <div class="sec-badge" id="badge-durasi">RANDOM 30±5 mnt</div>
+  </div>
+  <div class="sec-body">
+    <div class="pill-group" style="margin-bottom:16px">
+      <div class="pill">
+        <input type="radio" name="durasi" id="dur2" value="RANDOM" checked onchange="setDurasi('RANDOM')">
+        <label for="dur2">Random — Target Menit + Toleransi</label>
+      </div>
+      <div class="pill">
+        <input type="radio" name="durasi" id="dur1" value="MANUAL" onchange="setDurasi('MANUAL')">
+        <label for="dur1">Manual — Jumlah MP3 Tetap</label>
+      </div>
+    </div>
+
+    <div id="panel-random" class="sub-panel show">
+      <div class="row2">
+        <div class="field">
+          <label class="field-label">Target durasi (menit)</label>
+          <input type="number" id="targetMenit" value="30" min="1" oninput="calcRange()">
+        </div>
+        <div class="field">
+          <label class="field-label">Toleransi (±menit)</label>
+          <input type="number" id="toleransiMenit" value="5" min="0" oninput="calcRange()">
+        </div>
+      </div>
+      <div class="range-display" id="rangeDisplay">Range: 25–35 menit (1500–2100 detik)</div>
+    </div>
+
+    <div id="panel-manual" class="sub-panel">
+      <div class="field">
+        <label class="field-label">Jumlah MP3 per video (fixed)</label>
+        <input type="number" id="mp3PerVideo" value="5" min="1" oninput="updateSummary()">
+        <div class="hint">Setiap video akan berisi tepat sejumlah lagu ini.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. AUDIO TRANS -->
+<div class="section" id="sec-audio">
+  <div class="sec-head">
+    <div class="sec-icon">🎵</div>
+    <div class="sec-title">Transisi Audio</div>
+    <div class="sec-badge" id="badge-audio">NORMAL</div>
+  </div>
+  <div class="sec-body">
+    <div class="pill-group">
+      <div class="pill">
+        <input type="radio" name="audio" id="aud1" value="NORMAL" checked onchange="updateBadge('audio','NORMAL');updateSummary()">
+        <label for="aud1">Normal — Pindah lagu langsung (cepat)</label>
+      </div>
+      <div class="pill">
+        <input type="radio" name="audio" id="aud2" value="CROSSFADE" onchange="updateBadge('audio','CROSSFADE');updateSummary()">
+        <label for="aud2">Crossfade — Blend 4 detik (lebih lambat)</label>
+      </div>
+    </div>
+    <div class="hint">Normal jauh lebih cepat karena stream copy tanpa re-encode audio.</div>
+  </div>
+</div>
+
+<!-- 8. MODE EFEK -->
+<div class="section" id="sec-efek">
+  <div class="sec-head">
+    <div class="sec-icon">✨</div>
+    <div class="sec-title">Mode Efek Video</div>
+    <div class="sec-badge" id="badge-efek">RANDOM</div>
+  </div>
+  <div class="sec-body">
+    <div class="pill-group" style="margin-bottom:12px">
+      <div class="pill">
+        <input type="radio" name="efek" id="efek88" value="88" checked onchange="setEfek('88')">
+        <label for="efek88">Random (acak tiap video)</label>
+      </div>
+      <div class="pill">
+        <input type="radio" name="efek" id="efek99" value="99" onchange="setEfek('99')">
+        <label for="efek99">Rotasi (bergantian urut)</label>
+      </div>
+      <div class="pill">
+        <input type="radio" name="efek" id="efekN" value="STATIS" onchange="setEfek('STATIS')">
+        <label for="efekN">Statis (1 efek tetap)</label>
+      </div>
+    </div>
+    <div class="sub-panel" id="panel-efek-idx">
+      <label class="field-label">Index efek (0 = file pertama di efek\)</label>
+      <input type="number" id="efekIdx" value="0" min="0" oninput="updateSummary()">
+    </div>
+    <div class="hint">Index efek untuk Thumbnail diatur terpisah di bagian Thumbnail di atas.</div>
+  </div>
+</div>
+
+<!-- 9. MOTION -->
+<div class="section" id="sec-motion">
+  <div class="sec-head">
+    <div class="sec-icon">🎭</div>
+    <div class="sec-title">Motion Effect (Gambar)</div>
+    <div class="sec-badge" id="badge-motion">RANDOM</div>
+  </div>
+  <div class="sec-body">
+    <div class="field">
+      <label class="field-label">Pilih Motion</label>
+      <select id="motionSelect" onchange="setMotion(this)">
+        <option value="5|RANDOM">🎲 Random — Acak tiap video (20 motion)</option>
+        <option value="6|ROTASI">🔄 Rotasi — Bergantian semua motion</option>
+        <option value="1|ZOOMIN">1. Zoom In</option>
+        <option value="2|ZOOMOUT">2. Zoom Out</option>
+        <option value="3|WAVE">3. Wave Horizontal</option>
+        <option value="4|STATIC">4. Statis</option>
+        <option value="7|SINEPAN">7. Sine Pan</option>
+        <option value="8|BREATHING">8. Breathing</option>
+        <option value="9|SOFTBUMP">9. Soft Bump</option>
+        <option value="10|ZOOMROTATE">10. Zoom Rotate</option>
+        <option value="11|VERTWAVE">11. Vertical Wave</option>
+        <option value="12|FIGURE8">12. Figure-8</option>
+        <option value="13|DIAGONAL">13. Diagonal</option>
+        <option value="14|GENTLEROT">14. Gentle Rotation</option>
+        <option value="15|TRIPLEPULSE">15. Triple Pulse</option>
+        <option value="16|ZOOMSWAY">16. Zoom Sway</option>
+        <option value="17|ORBIT2X">17. Orbit 2x</option>
+        <option value="18|VIBRATE">18. Vibrate</option>
+        <option value="19|PENDULUM">19. Pendulum</option>
+        <option value="20|BREATHSWAY">20. Breath Sway</option>
+        <option value="21|HEARTBEAT">21. Heartbeat</option>
+        <option value="22|KENBURNS">22. Ken Burns</option>
+      </select>
+    </div>
+    <div class="hint">Random / Rotasi direkomendasikan untuk variasi konten YouTube yang lebih baik.</div>
+  </div>
+</div>
+
+<!-- 10. KECEPATAN -->
+<div class="section" id="sec-speed">
+  <div class="sec-head">
+    <div class="sec-icon">⚡</div>
+    <div class="sec-title">Kecepatan Motion</div>
+    <div class="sec-badge" id="badge-speed">NORMAL</div>
+  </div>
+  <div class="sec-body">
+    <div class="pill-group">
+      <div class="pill">
+        <input type="radio" name="speed" id="sp1" value="1|LAMBAT" onchange="updateBadge('speed','LAMBAT');updateSummary()">
+        <label for="sp1">Lambat</label>
+      </div>
+      <div class="pill">
+        <input type="radio" name="speed" id="sp2" value="2|NORMAL" checked onchange="updateBadge('speed','NORMAL');updateSummary()">
+        <label for="sp2">Normal</label>
+      </div>
+      <div class="pill">
+        <input type="radio" name="speed" id="sp3" value="3|CEPAT" onchange="updateBadge('speed','CEPAT');updateSummary()">
+        <label for="sp3">Cepat</label>
+      </div>
+      <div class="pill">
+        <input type="radio" name="speed" id="sp4" value="4|RANDOM_SPEED" onchange="updateBadge('speed','RANDOM');updateSummary()">
+        <label for="sp4">Random</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- SUMMARY BAR -->
+<div class="summary-bar">
+  <div class="summary-inner">
+    <div class="summary-tags" id="summaryTags"></div>
+    <button class="gen-btn" onclick="generateBat()">⬇ GENERATE .BAT</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  rootPath:'',
+  pilihRes:'2', vidW:'1920', vidH:'1080', vidPreset:'fast',
+  pilihThumb:'1', modeThumb:'NONE', thumbEfxIdx:'NONE',
+  modeIntro:'NONE', introStatisIdx:'0',
+  jumlah:'5',
+  pilihDurasi:'2', modeDurasi:'RANDOM', mp3PerVideo:'', targetMenit:'30', toleransiMenit:'5', rangeMin:'1500', rangeMax:'2100',
+  pilihAudio:'1', modeAudio:'NORMAL',
+  pilihEfek:'88', modeEfek:'RANDOM_EFX', efekStatisIdx:'',
+  pilihMotion:'5', modeMotion:'RANDOM',
+  pilihSpeed:'2', modeSpeed:'NORMAL',
+};
+
+// ============================================================
+// HANDLERS
+// ============================================================
+function setRes(el){
+  state.pilihRes = el.value;
+  if(el.value==='1'){ state.vidW='3840';state.vidH='2160';state.vidPreset='medium'; updateBadge('res','4K 2160p'); }
+  else { state.vidW='1920';state.vidH='1080';state.vidPreset='fast'; updateBadge('res','FHD 1080p'); }
+  updateSummary();
+}
+function setThumb(n){
+  state.pilihThumb=String(n);
+  const modes=['','NONE','POLOS','EFEK'];
+  state.modeThumb=modes[n];
+  document.getElementById('panel-thumb-efx').classList.toggle('show', n===3);
+  updateBadge('thumb', modes[n]);
+  if(n!==3){ state.thumbEfxIdx='NONE'; }
+  updateSummary();
+}
+function setThumbEfx(v){
+  if(v==='SAME'){
+    state.thumbEfxIdx='SAME';
+    document.getElementById('panel-thumb-idx').style.display='none';
+  } else {
+    document.getElementById('panel-thumb-idx').style.display='block';
+    state.thumbEfxIdx=document.getElementById('thumbEfxIdx').value||'0';
+  }
+  updateSummary();
+}
+function setIntro(v){
+  state.modeIntro=v;
+  document.getElementById('panel-intro-idx').classList.toggle('show', v==='STATIS');
+  updateBadge('intro',v);
+  updateSummary();
+}
+function setDurasi(v){
+  state.modeDurasi=v; state.pilihDurasi=(v==='MANUAL'?'1':'2');
+  document.getElementById('panel-random').classList.toggle('show',v==='RANDOM');
+  document.getElementById('panel-manual').classList.toggle('show',v==='MANUAL');
+  updateSummary();
+}
+function calcRange(){
+  const t=parseInt(document.getElementById('targetMenit').value)||30;
+  const tol=parseInt(document.getElementById('toleransiMenit').value)||5;
+  const minS=Math.max(60,(t-tol)*60);
+  const maxS=(t+tol)*60;
+  state.targetMenit=String(t);
+  state.toleransiMenit=String(tol);
+  state.rangeMin=String(minS);
+  state.rangeMax=String(maxS);
+  document.getElementById('rangeDisplay').textContent=
+    `Range: ${t-tol}–${t+tol} menit (${minS}–${maxS} detik)`;
+  updateBadge('durasi',`RANDOM ${t}±${tol} mnt`);
+  updateSummary();
+}
+function setEfek(v){
+  state.pilihEfek=v;
+  if(v==='88'){ state.modeEfek='RANDOM_EFX'; state.efekStatisIdx=''; updateBadge('efek','RANDOM'); }
+  else if(v==='99'){ state.modeEfek='ROTASI'; state.efekStatisIdx=''; updateBadge('efek','ROTASI'); }
+  else { state.modeEfek='STATIS'; state.efekStatisIdx=String(document.getElementById('efekIdx').value||'0'); updateBadge('efek','STATIS #'+state.efekStatisIdx); }
+  document.getElementById('panel-efek-idx').classList.toggle('show', v==='STATIS');
+  updateSummary();
+}
+function setMotion(el){
+  const parts=el.value.split('|');
+  state.pilihMotion=parts[0]; state.modeMotion=parts[1];
+  updateBadge('motion', parts[1]);
+  updateSummary();
+}
+
+function updateBadge(id,val){
+  document.getElementById('badge-'+id).textContent=val;
+}
+
+// ============================================================
+// LIVE SUMMARY
+// ============================================================
+function updateSummary(){
+  state.rootPath = document.getElementById('rootPath').value.trim();
+  state.jumlah = document.getElementById('jumlahVideo').value||'5';
+  if(state.modeEfek==='STATIS') state.efekStatisIdx=document.getElementById('efekIdx').value||'0';
+  if(state.modeIntro==='STATIS') state.introStatisIdx=document.getElementById('introIdx').value||'0';
+  if(document.getElementById('te-custom').checked && state.modeThumb==='EFEK'){
+    state.thumbEfxIdx=document.getElementById('thumbEfxIdx').value||'0';
+  }
+  if(state.modeDurasi==='MANUAL') state.mp3PerVideo=document.getElementById('mp3PerVideo').value||'5';
+
+  const tags = [
+    {l:'PATH', v: state.rootPath ? state.rootPath.split('\\').pop()||state.rootPath : '⚠ BELUM', hi:!!state.rootPath},
+    {l:'RES', v: state.vidW+'×'+state.vidH, hi:true},
+    {l:'THUMB', v: state.modeThumb, hi: state.modeThumb!=='NONE'},
+    {l:'INTRO', v: state.modeIntro, hi: state.modeIntro!=='NONE'},
+    {l:'JML', v: state.jumlah+' vid', hi:true},
+    {l:'DURASI', v: state.modeDurasi==='RANDOM'?state.targetMenit+'±'+state.toleransiMenit+'m':state.mp3PerVideo+' mp3', hi:true},
+    {l:'AUDIO', v: state.modeAudio, hi:true},
+    {l:'EFEK', v: state.modeEfek, hi:true},
+    {l:'MOTION', v: state.modeMotion, hi:true},
+    {l:'SPEED', v: state.modeSpeed, hi:true},
+  ];
+  const audio = document.querySelector('input[name=audio]:checked');
+  if(audio) state.modeAudio = audio.value, state.pilihAudio = audio.value==='NORMAL'?'1':'2';
+  const speed = document.querySelector('input[name=speed]:checked');
+  if(speed){ const p=speed.value.split('|'); state.pilihSpeed=p[0]; state.modeSpeed=p[1]; }
+
+  document.getElementById('summaryTags').innerHTML = tags.map(t=>
+    `<span class="stag ${t.hi?'hi':''}">${t.l}: ${t.v}</span>`
+  ).join('');
+}
+
+// ============================================================
+// BUILD CONFIG BLOCK (replaces BAGIAN 3 in bat)
+// ============================================================
+function buildConfigBlock(){
+  const s = state;
+  const lines = [
+    `REM ============================================================`,
+    `REM  BAGIAN 3: KONFIGURASI (Di-generate oleh MVC Web Configurator)`,
+    `REM ============================================================`,
+    `echo.`,
+    `echo  [WEB-CONFIG] Memuat konfigurasi dari Web Configurator...`,
+    `echo.`,
+    ``,
+    `REM --- Resolusi ---`,
+    `set "PILIH_RES=${s.pilihRes}"`,
+    `set "VID_W=${s.vidW}"`,
+    `set "VID_H=${s.vidH}"`,
+    `set "VID_PRESET=${s.vidPreset}"`,
+    ``,
+    `REM --- Thumbnail ---`,
+    `set "PILIH_THUMB=${s.pilihThumb}"`,
+    `set "MODE_THUMBNAIL=${s.modeThumb}"`,
+    `set "THUMB_EFEK_IDX=${s.thumbEfxIdx}"`,
+    `set "PILIH_THUMB_EFX=${s.thumbEfxIdx==='SAME'?'S':s.thumbEfxIdx==='NONE'?'NONE':s.thumbEfxIdx}"`,
+    ``,
+    `REM --- Intro ---`,
+    `set "MODE_INTRO=${s.modeIntro}"`,
+    `set "PILIH_INTRO=${s.modeIntro==='RANDOM'?'1':s.modeIntro==='STATIS'?'2':'3'}"`,
+    `set "INTRO_STATIS_IDX=${s.introStatisIdx}"`,
+    ``,
+    `REM --- Jumlah Output ---`,
+    `set "JUMLAH_OUTPUT=${s.jumlah}"`,
+    ``,
+    `REM --- Mode Durasi ---`,
+    `set "PILIH_DURASI=${s.pilihDurasi}"`,
+    `set "MODE_DURASI=${s.modeDurasi}"`,
+    `set "MP3_PER_VIDEO=${s.mp3PerVideo}"`,
+    `set "TARGET_MENIT=${s.targetMenit}"`,
+    `set "TOLERANSI_MENIT=${s.toleransiMenit}"`,
+    `set "RANGE_MIN_SEC=${s.rangeMin}"`,
+    `set "RANGE_MAX_SEC=${s.rangeMax}"`,
+    ``,
+    `REM --- Transisi Audio ---`,
+    `set "PILIH_AUDIO_TRANS=${s.pilihAudio}"`,
+    `set "MODE_AUDIO_TRANS=${s.modeAudio}"`,
+    ``,
+    `REM --- Mode Efek ---`,
+    `set "PILIH_EFEK=${s.pilihEfek}"`,
+    `set "MODE_EFEK=${s.modeEfek}"`,
+    `set "EFEK_STATIS_IDX=${s.efekStatisIdx}"`,
+    ``,
+    `REM --- Motion ---`,
+    `set "PILIH_MOTION=${s.pilihMotion}"`,
+    `set "MODE_MOTION=${s.modeMotion}"`,
+    ``,
+    `REM --- Kecepatan ---`,
+    `set "PILIH_SPEED=${s.pilihSpeed}"`,
+    `set "MODE_SPEED=${s.modeSpeed}"`,
+    ``,
+    `goto SAVE_AND_PROCEED`,
+    ``,
+  ];
+  return lines.join('\r\n');
+}
+
+// ============================================================
+// BAT TEMPLATES
+// ============================================================
+
+// PART A: Lines 1-178 (header, init, cleanup, asset reading)
+function getBatPartA(rootPath){
+return `@echo off
+REM ============================================================
+REM  MUSIC VIDEO COMPILER - Smart Loop Render v28.0 (Windows)
+REM  + [NEW] Auto-Folderisasi Musik & Gambar sebelum eksekusi
+REM  + [NEW] Cleanup Folder Temporary saat start
+REM  + [NEW] Isolasi Efek Thumbnail (Efek thumb tidak terpakai di base)
+REM  + Fitur Auto Thumbnail YouTube (3 detik awal statis)
+REM  + Thumbnail Custom Effect (Bisa beda dari efek utama)
+REM  + Unified Prefix Logic (Thumb + Intro Seamless)
+REM  + Fitur Intro Video (introready & intro_cache)
+REM  + Sinkronisasi Audio sejak detik 0 & Encoding AAC Final Mux
+REM  + LOW-RAM FIX v2 (Deteksi & Hemat RAM ref=1:bframes=0)
+REM  + Fix encoding error pada Crossfade & Normal Concat
+REM ============================================================
+chcp 65001 >nul
+setlocal EnableDelayedExpansion
+
+REM --- Pindah ke folder project (di-generate oleh Web Configurator) ---
+cd /d "${rootPath}"
+if %errorlevel% neq 0 (
+    echo [ERROR] Tidak bisa membuka folder: ${rootPath}
+    echo         Pastikan path sudah benar dan folder ada.
+    pause & exit /b 1
+)
+echo [OK] Folder project: ${rootPath}
+echo.
+
+REM ============================================================
+REM  BAGIAN 0: CLEANUP AWAL (ANTI MACET ^& FILE SISA)
+REM ============================================================
+echo.
+echo  [INIT] Membersihkan proses FFmpeg yang macet...
+taskkill /F /IM ffmpeg.exe >nul 2>&1
+echo.
+
+echo  [INIT] Memeriksa folder temporary sisa proses sebelumnya...
+if exist "tempmerged\\*" (
+    echo  [WARN] Ditemukan file sisa di 'tempmerged'. Menghapus...
+    del /q /f "tempmerged\\*" >nul 2>&1
+)
+if exist "tempvideo\\*" (
+    echo  [WARN] Ditemukan file sisa di 'tempvideo'. Menghapus...
+    del /q /f "tempvideo\\*" >nul 2>&1
+)
+echo  [OK] Folder temporary bersih.
+echo.
+
+REM ============================================================
+REM  BAGIAN 1: INISIALISASI ^& PENGECEKAN SISTEM
+REM ============================================================
+
+echo  ================================================
+echo   MUSIC VIDEO COMPILER - Smart Loop Render v28.0
+echo   [Windows Edition + AUTO THUMBNAIL + AUTO FOLDER]
+echo  ================================================
+echo.
+REM --- Cek ketersediaan FFmpeg ---
+where ffmpeg >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [ERROR] FFmpeg tidak ditemukan di PATH^^!
+    echo         Unduh dari https://ffmpeg.org dan tambahkan ke PATH.
+    pause & exit /b 1
+)
+
+REM --- Cek ketersediaan PowerShell ---
+where powershell >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [ERROR] PowerShell tidak ditemukan di PATH^^!
+    pause & exit /b 1
+)
+
+echo [OK] FFmpeg dan PowerShell terdeteksi.
+echo.
+
+REM --- Deteksi RAM bebas ---
+set "FREE_RAM_MB=0"
+for /f "usebackq delims=" %%R in (\`powershell -NoProfile -Command "[math]::Round((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1024)" 2^>nul\`) do set "FREE_RAM_MB=%%R"
+echo [INFO] RAM bebas terdeteksi: !FREE_RAM_MB! MB
+set "LOW_RAM_FLAG=0"
+if !FREE_RAM_MB! lss 2048 set "LOW_RAM_FLAG=1"
+if "!LOW_RAM_FLAG!"=="1" echo [WARN] RAM bebas kurang dari 2GB. Mode hemat RAM diaktifkan ^(ref=1:bframes=0^).
+echo.
+
+REM --- Buat folder kerja jika belum ada ---
+if not exist "tempmerged"       ( mkdir "tempmerged"       & echo [INFO] Folder dibuat: tempmerged )
+if not exist "tempvideo"        ( mkdir "tempvideo"        & echo [INFO] Folder dibuat: tempvideo )
+if not exist "gambarterpakai"   ( mkdir "gambarterpakai"   & echo [INFO] Folder dibuat: gambarterpakai )
+if not exist "outputvideofinal" ( mkdir "outputvideofinal" & echo [INFO] Folder dibuat: outputvideofinal )
+if not exist "efek"             ( mkdir "efek"             & echo [INFO] Folder dibuat: efek )
+if not exist "introready"       ( mkdir "introready"       & echo [INFO] Folder dibuat: introready )
+if not exist "intro_cache"      ( mkdir "intro_cache"      & echo [INFO] Folder dibuat: intro_cache )
+if not exist "musik"            ( mkdir "musik"            & echo [INFO] Folder dibuat: musik )
+if not exist "gambar"           ( mkdir "gambar"           & echo [INFO] Folder dibuat: gambar )
+echo.
+
+REM ============================================================
+REM  BAGIAN 1.5: AUTO-FOLDERISASI
+REM ============================================================
+echo  [INIT] Memeriksa file musik dan gambar di luar folder...
+set "MP3_MOVED=0"
+for %%F in (*.mp3) do (
+    move /y "%%F" "musik\\%%F" >nul 2>&1
+    set /a MP3_MOVED+=1
+)
+if !MP3_MOVED! gtr 0 echo  [OK] !MP3_MOVED! file MP3 dipindahkan ke folder 'musik\\.
+
+set "IMG_MOVED=0"
+for %%F in (*.jpg *.jpeg *.png *.webp *.bmp) do (
+    move /y "%%F" "gambar\\%%F" >nul 2>&1
+    set /a IMG_MOVED+=1
+)
+if !IMG_MOVED! gtr 0 echo  [OK] !IMG_MOVED! file gambar dipindahkan ke folder 'gambar\\.
+
+if !MP3_MOVED! equ 0 if !IMG_MOVED! equ 0 echo  [OK] Tidak ada file yang perlu dipindahkan.
+echo.
+
+REM ============================================================
+REM  BAGIAN 2: PEMBACAAN ASET ^& KALKULASI
+REM ============================================================
+
+set "COUNT_IMG=0"
+for %%F in (gambar\\*.jpg gambar\\*.jpeg gambar\\*.png gambar\\*.webp gambar\\*.bmp) do set /a COUNT_IMG+=1
+
+set "COUNT_EFX=0"
+for %%F in (efek\\*.mp4 efek\\*.mkv efek\\*.avi) do set /a COUNT_EFX+=1
+
+if %COUNT_IMG% equ 0 (
+    echo [ERROR] Tidak ada file gambar ^(jpg/png/webp^) di folder gambar\\^^!
+    pause & exit /b 1
+)
+if %COUNT_EFX% equ 0 (
+    echo [ERROR] Tidak ada file video efek di folder efek\\
+    pause & exit /b 1
+)
+
+set "EFX_IDX=0"
+for %%F in (efek\\*.mp4 efek\\*.mkv efek\\*.avi) do (
+    set "EFX_ARR[!EFX_IDX!]=%%F"
+    set /a EFX_IDX+=1
+)
+set /a EFX_MAX=EFX_IDX-1
+
+REM --- Kalkulasi File Intro ---
+set "COUNT_INTRO=0"
+set "INTRO_IDX=0"
+for %%F in (introready\\*.mp4 introready\\*.mkv introready\\*.mov introready\\*.avi) do (
+    set "INTRO_ARR[!INTRO_IDX!]=%%F"
+    set /a INTRO_IDX+=1
+    set /a COUNT_INTRO+=1
+)
+set /a INTRO_MAX=INTRO_IDX-1
+
+echo [INFO] Memindai file MP3 dari folder musik\\, harap tunggu...
+set "COUNT_MP3=0"
+set "TOTAL_SEC=0"
+set "DB_MP3=%TEMP%\\mvc_mp3_database.txt"
+if exist "!DB_MP3!" del "!DB_MP3!"
+
+for %%F in (musik\\*.mp3) do (
+    set /a COUNT_MP3+=1
+    for /f "delims=." %%D in ('ffprobe -v error -show_entries format^=duration -of default^=noprint_wrappers^=1:nokey^=1 "%%F" 2^>nul') do (
+        set /a TOTAL_SEC+=%%D
+        setlocal DisableDelayedExpansion
+        echo %%D^|%%~fF >> "%TEMP%\\mvc_mp3_database.txt"
+        endlocal
+    )
+)
+
+if %COUNT_MP3% equ 0 (
+    echo [ERROR] Tidak ada file .mp3 di folder musik\\^^!
+    pause & exit /b 1
+)
+
+set /a TOTAL_MIN=TOTAL_SEC / 60
+set /a TOTAL_HR=TOTAL_SEC / 3600
+
+echo  -----------------------------------------------
+echo   INFO ASET YANG TERSEDIA
+echo  -----------------------------------------------
+echo   File MP3      : %COUNT_MP3% file (di folder musik\\)
+echo   Total Durasi  : !TOTAL_SEC! detik ^(!TOTAL_MIN! menit / !TOTAL_HR! jam^)
+echo   File Gambar   : %COUNT_IMG% file (di folder gambar\\)
+echo   File Efek     : %COUNT_EFX% file
+echo   File Intro    : %COUNT_INTRO% file
+echo  -----------------------------------------------
+echo.
+
+`;
+}
+
+// PART B: Lines 427-1067 (SAVE_AND_PROCEED through end + subroutines)
+const BAT_PART_B = `
+:SAVE_AND_PROCEED
+if !JUMLAH_OUTPUT! gtr %COUNT_IMG% set "JUMLAH_OUTPUT=%COUNT_IMG%"
+
+del /q mvc_setting_*.ini >nul 2>&1
+powershell -NoProfile -Command "Get-Date -Format 'yyyyMMdd_HHmmss'" > "%TEMP%\\mvc_datetime.txt"
+set /p "_SET_DT=" < "%TEMP%\\mvc_datetime.txt"
+del "%TEMP%\\mvc_datetime.txt" >nul 2>&1
+set "SETTING_FILE=mvc_setting_!_SET_DT!-RES_!PILIH_RES!-EFX_!PILIH_EFEK!.ini"
+
+(
+    echo PILIH_RES=!PILIH_RES!
+    echo VID_W=!VID_W!
+    echo VID_H=!VID_H!
+    echo VID_PRESET=!VID_PRESET!
+    echo JUMLAH_OUTPUT=!JUMLAH_OUTPUT!
+    echo PILIH_DURASI=!PILIH_DURASI!
+    echo MODE_DURASI=!MODE_DURASI!
+    echo MP3_PER_VIDEO=!MP3_PER_VIDEO!
+    echo TARGET_MENIT=!TARGET_MENIT!
+    echo TOLERANSI_MENIT=!TOLERANSI_MENIT!
+    echo RANGE_MIN_SEC=!RANGE_MIN_SEC!
+    echo RANGE_MAX_SEC=!RANGE_MAX_SEC!
+    echo PILIH_AUDIO_TRANS=!PILIH_AUDIO_TRANS!
+    echo MODE_AUDIO_TRANS=!MODE_AUDIO_TRANS!
+    echo PILIH_EFEK=!PILIH_EFEK!
+    echo MODE_EFEK=!MODE_EFEK!
+    echo EFEK_STATIS_IDX=!EFEK_STATIS_IDX!
+    echo PILIH_MOTION=!PILIH_MOTION!
+    echo MODE_MOTION=!MODE_MOTION!
+    echo PILIH_SPEED=!PILIH_SPEED!
+    echo MODE_SPEED=!MODE_SPEED!
+    echo PILIH_THUMB=!PILIH_THUMB!
+    echo MODE_THUMBNAIL=!MODE_THUMBNAIL!
+    echo THUMB_EFEK_IDX=!THUMB_EFEK_IDX!
+    echo MODE_INTRO=!MODE_INTRO!
+    echo INTRO_STATIS_IDX=!INTRO_STATIS_IDX!
+) > "!SETTING_FILE!"
+
+echo [INFO] Setting disimpan ke: !SETTING_FILE!
+echo.
+
+REM ============================================================
+REM  BAGIAN 4: PROSES UTAMA - MAIN LOOP RENDER
+REM ============================================================
+
+set "ROTASI_EFX_IDX=0"
+set "ROTASI_MOTION_IDX=0"
+set "THUMB_ROTASI_IDX=0"
+set "LOOP_NUM=0"
+set "SUCCESS_COUNT=0"
+set "CURR_DIR=%CD%"
+
+REM Parse Thumbnail Effects
+set "THUMB_EFX_COUNT=0"
+if not "!THUMB_EFEK_IDX!"=="SAME" (
+    if not "!THUMB_EFEK_IDX!"=="NONE" (
+        for %%I in (!THUMB_EFEK_IDX!) do (
+            set "THUMB_EFX_LIST[!THUMB_EFX_COUNT!]=%%I"
+            set /a THUMB_EFX_COUNT+=1
+        )
+    )
+)
+
+:MAIN_LOOP
+if !LOOP_NUM! geq !JUMLAH_OUTPUT! goto RENDER_SELESAI
+set /a "LOOP_NUM+=1"
+
+echo.
+echo  [VIDEO !LOOP_NUM! / !JUMLAH_OUTPUT!] ==============================
+echo.
+
+REM --- A: PILIH EFEK VIDEO (DENGAN ISOLASI THUMBNAIL) ---
+
+if "!MODE_EFEK!"=="RANDOM_EFX" (
+    set "_TRIES=0"
+    :RANDOM_EFX_LOOP
+    set /a "CURR_EFX_IDX=!RANDOM! %% (EFX_MAX+1)"
+    set /a "_TRIES+=1"
+    set "IS_ISOLATED=0"
+    if !THUMB_EFX_COUNT! gtr 0 (
+        for %%I in (!THUMB_EFEK_IDX!) do (
+            if "!CURR_EFX_IDX!"=="%%I" set "IS_ISOLATED=1"
+        )
+    )
+    if "!IS_ISOLATED!"=="1" (
+        if !_TRIES! lss 50 goto RANDOM_EFX_LOOP
+    )
+) else if "!MODE_EFEK!"=="ROTASI" (
+    set "_R_TRIES=0"
+    :ROTASI_EFX_LOOP
+    set "CURR_EFX_IDX=!ROTASI_EFX_IDX!"
+    set "IS_ISOLATED=0"
+    if !THUMB_EFX_COUNT! gtr 0 (
+        for %%I in (!THUMB_EFEK_IDX!) do (
+            if "!CURR_EFX_IDX!"=="%%I" set "IS_ISOLATED=1"
+        )
+    )
+    if "!IS_ISOLATED!"=="1" (
+        set /a "_R_TRIES+=1"
+        set /a "ROTASI_EFX_IDX=(ROTASI_EFX_IDX+1) %% (EFX_MAX+1)"
+        if !_R_TRIES! lss 50 goto ROTASI_EFX_LOOP
+        set "CURR_EFX_IDX=!ROTASI_EFX_IDX!"
+    )
+    set /a "ROTASI_EFX_IDX=(ROTASI_EFX_IDX+1) %% (EFX_MAX+1)"
+) else (
+    set "CURR_EFX_IDX=!EFEK_STATIS_IDX!"
+)
+
+for /l %%N in (0,1,%EFX_MAX%) do ( if %%N==!CURR_EFX_IDX! set "CURR_EFX=!EFX_ARR[%%N]!" )
+
+set "EFX_DUR_RAW="
+for /f "usebackq tokens=* delims=" %%D in (\`ffprobe -v error -show_entries format^=duration -of default^=noprint_wrappers^=1:nokey^=1 "!CURR_EFX!" 2^>nul\`) do set "EFX_DUR_RAW=%%D"
+
+set "EFX_DUR=10"
+if defined EFX_DUR_RAW (
+    for /f "delims=" %%X in ('powershell -NoProfile -Command "[math]::Round(!EFX_DUR_RAW!)" 2^>nul') do set "EFX_DUR=%%X"
+)
+echo      Efek   : !CURR_EFX! ^(!EFX_DUR! detik^)
+
+REM --- B: PILIH GAMBAR SECARA ACAK DARI FOLDER GAMBAR ---
+set "PS1_IMG=%TEMP%\\mvc_pick_img.ps1"
+echo $imgs = Get-ChildItem -Path '!CURR_DIR!\\gambar\\*' -Include '*.jpg','*.jpeg','*.png','*.webp','*.bmp' -File > "!PS1_IMG!"
+echo if ($imgs.Count -eq 0) { Write-Error 'NO_IMAGE'; exit 1 } >> "!PS1_IMG!"
+echo ($imgs ^| Get-Random).FullName >> "!PS1_IMG!"
+set "CURR_IMG="
+setlocal DisableDelayedExpansion
+for /f "usebackq delims=" %%G in (\`powershell -ExecutionPolicy Bypass -NoProfile -File "%TEMP%\\mvc_pick_img.ps1" 2^>nul\`) do set "CURR_IMG=%%G"
+endlocal & set "CURR_IMG=%CURR_IMG%"
+del "%TEMP%\\mvc_pick_img.ps1" >nul 2>&1
+
+if not defined CURR_IMG ( echo  [ERROR] Tidak ada gambar tersisa di folder gambar\\^^! & goto NEXT_LOOP )
+echo      Gambar : !CURR_IMG!
+
+REM --- C: BUILD AUDIO ---
+echo      Membangun list audio...
+if exist "%TEMP%\\mvc_selected.txt" del "%TEMP%\\mvc_selected.txt"
+if exist "tempmerged\\concat_list.txt" del "tempmerged\\concat_list.txt"
+
+if "!MODE_DURASI!"=="MANUAL" (
+    call :WRITE_PS1_MANUAL
+    powershell -ExecutionPolicy Bypass -NoProfile -File "%TEMP%\\mvc_sel_manual.ps1" >nul 2>&1
+) else (
+    call :WRITE_PS1_RANDOM
+    powershell -ExecutionPolicy Bypass -NoProfile -File "%TEMP%\\mvc_sel_random.ps1" >nul 2>&1
+)
+
+set "SELECTED_COUNT=0"
+if exist "%TEMP%\\mvc_selected.txt" (
+    for /f %%L in ('find /c /v "" ^< "%TEMP%\\mvc_selected.txt" 2^>nul') do set "SELECTED_COUNT=%%L"
+)
+
+if !SELECTED_COUNT! equ 0 ( echo  [ERROR] Tidak ada MP3 terpilih^^! & goto NEXT_LOOP )
+
+if "!MODE_AUDIO_TRANS!"=="CROSSFADE" (
+    echo      Menerapkan efek Fading/Crossfade ^(Harap tunggu, proses re-encode...^)
+    call :BUILD_CROSSFADE
+    set "_AUDIO_FILE=tempmerged\\audio_temp.aac"
+) else (
+    :FALLBACK_NORMAL
+    echo      Menggabungkan MP3 Mode Cepat / Normal...
+    setlocal DisableDelayedExpansion
+    for /f "usebackq delims=" %%M in ("%TEMP%\\mvc_selected.txt") do (
+        set "_CPATH=%%M"
+        setlocal EnableDelayedExpansion
+        set "_CPATH=!_CPATH:\\=/!"
+        echo file '!_CPATH!' >> "tempmerged\\concat_list.txt"
+        endlocal
+    )
+    endlocal
+    ffmpeg -y -f concat -safe 0 -i "tempmerged\\concat_list.txt" -c:a copy "tempmerged\\audio_temp.mp3" -loglevel warning
+    if !errorlevel! neq 0 (
+        ffmpeg -y -f concat -safe 0 -i "tempmerged\\concat_list.txt" -c:a copy "tempmerged\\audio_temp.mp3" -loglevel warning
+    )
+    set "_AUDIO_FILE=tempmerged\\audio_temp.mp3"
+)
+
+REM --- D: SMART RENDER PHASE 1 ---
+if "!MODE_MOTION!"=="RANDOM" (
+    set /a "_RMOD=!RANDOM! %% 20"
+    if !_RMOD!==0  set "ACTIVE_MOTION=ZOOMIN"
+    if !_RMOD!==1  set "ACTIVE_MOTION=ZOOMOUT"
+    if !_RMOD!==2  set "ACTIVE_MOTION=WAVE"
+    if !_RMOD!==3  set "ACTIVE_MOTION=STATIC"
+    if !_RMOD!==4  set "ACTIVE_MOTION=SINEPAN"
+    if !_RMOD!==5  set "ACTIVE_MOTION=BREATHING"
+    if !_RMOD!==6  set "ACTIVE_MOTION=SOFTBUMP"
+    if !_RMOD!==7  set "ACTIVE_MOTION=ZOOMROTATE"
+    if !_RMOD!==8  set "ACTIVE_MOTION=VERTWAVE"
+    if !_RMOD!==9  set "ACTIVE_MOTION=FIGURE8"
+    if !_RMOD!==10 set "ACTIVE_MOTION=DIAGONAL"
+    if !_RMOD!==11 set "ACTIVE_MOTION=GENTLEROT"
+    if !_RMOD!==12 set "ACTIVE_MOTION=TRIPLEPULSE"
+    if !_RMOD!==13 set "ACTIVE_MOTION=ZOOMSWAY"
+    if !_RMOD!==14 set "ACTIVE_MOTION=ORBIT2X"
+    if !_RMOD!==15 set "ACTIVE_MOTION=VIBRATE"
+    if !_RMOD!==16 set "ACTIVE_MOTION=PENDULUM"
+    if !_RMOD!==17 set "ACTIVE_MOTION=BREATHSWAY"
+    if !_RMOD!==18 set "ACTIVE_MOTION=HEARTBEAT"
+    if !_RMOD!==19 set "ACTIVE_MOTION=KENBURNS"
+) else if "!MODE_MOTION!"=="ROTASI" (
+    set /a "_RMOD=!ROTASI_MOTION_IDX! %% 20"
+    if !_RMOD!==0  set "ACTIVE_MOTION=ZOOMIN"
+    if !_RMOD!==1  set "ACTIVE_MOTION=ZOOMOUT"
+    if !_RMOD!==2  set "ACTIVE_MOTION=WAVE"
+    if !_RMOD!==3  set "ACTIVE_MOTION=STATIC"
+    if !_RMOD!==4  set "ACTIVE_MOTION=SINEPAN"
+    if !_RMOD!==5  set "ACTIVE_MOTION=BREATHING"
+    if !_RMOD!==6  set "ACTIVE_MOTION=SOFTBUMP"
+    if !_RMOD!==7  set "ACTIVE_MOTION=ZOOMROTATE"
+    if !_RMOD!==8  set "ACTIVE_MOTION=VERTWAVE"
+    if !_RMOD!==9  set "ACTIVE_MOTION=FIGURE8"
+    if !_RMOD!==10 set "ACTIVE_MOTION=DIAGONAL"
+    if !_RMOD!==11 set "ACTIVE_MOTION=GENTLEROT"
+    if !_RMOD!==12 set "ACTIVE_MOTION=TRIPLEPULSE"
+    if !_RMOD!==13 set "ACTIVE_MOTION=ZOOMSWAY"
+    if !_RMOD!==14 set "ACTIVE_MOTION=ORBIT2X"
+    if !_RMOD!==15 set "ACTIVE_MOTION=VIBRATE"
+    if !_RMOD!==16 set "ACTIVE_MOTION=PENDULUM"
+    if !_RMOD!==17 set "ACTIVE_MOTION=BREATHSWAY"
+    if !_RMOD!==18 set "ACTIVE_MOTION=HEARTBEAT"
+    if !_RMOD!==19 set "ACTIVE_MOTION=KENBURNS"
+    set /a "ROTASI_MOTION_IDX+=1"
+) else ( set "ACTIVE_MOTION=!MODE_MOTION!" )
+
+set /a "TOTAL_FRAMES = EFX_DUR * 60"
+set /a "ZOOM_W = VID_W + 200"
+set /a "ZOOM_H = VID_H + 200"
+set "ZP_SHAPE=(1-cos(2*PI*on/!TOTAL_FRAMES!))/2"
+set "ZP_SHAPE_ZR=(1-cos(4*PI*on/!TOTAL_FRAMES!))/2"
+
+if "!MODE_SPEED!"=="RANDOM_SPEED" (
+    set /a "_RSPD=!RANDOM! %% 3"
+    if !_RSPD!==0 set "ACTIVE_SPEED=LAMBAT"
+    if !_RSPD!==1 set "ACTIVE_SPEED=NORMAL"
+    if !_RSPD!==2 set "ACTIVE_SPEED=CEPAT"
+) else ( set "ACTIVE_SPEED=!MODE_SPEED!" )
+
+if "!ACTIVE_SPEED!"=="LAMBAT" ( set "ZOOM_MULT=0.025" & set "WAVE_AMP_S=40" & set "PAN_AMP_S=25" & set "ROT_RAD_S=0.01745" & set "BRIGHT_AMP=0.04"
+) else if "!ACTIVE_SPEED!"=="CEPAT" ( set "ZOOM_MULT=0.10" & set "WAVE_AMP_S=160" & set "PAN_AMP_S=100" & set "ROT_RAD_S=0.10472" & set "BRIGHT_AMP=0.12"
+) else ( set "ZOOM_MULT=0.05" & set "WAVE_AMP_S=80" & set "PAN_AMP_S=50" & set "ROT_RAD_S=0.05236" & set "BRIGHT_AMP=0.07" )
+
+if "!ACTIVE_MOTION!"=="ZOOMIN" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE!':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+) else if "!ACTIVE_MOTION!"=="ZOOMOUT" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='(1.0+!ZOOM_MULT!)-!ZOOM_MULT!*!ZP_SHAPE!':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+) else if "!ACTIVE_MOTION!"=="WAVE" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2+sin(2*PI*t/!EFX_DUR!)*!WAVE_AMP_S!':'(ih-oh)/2',fps=60"
+) else if "!ACTIVE_MOTION!"=="SINEPAN" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2+sin(2*PI*t/!EFX_DUR!)*!WAVE_AMP_S!':'(ih-oh)/2+cos(2*PI*t/!EFX_DUR!)*!PAN_AMP_S!',fps=60"
+) else if "!ACTIVE_MOTION!"=="BREATHING" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE!':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+) else if "!ACTIVE_MOTION!"=="SOFTBUMP" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE!':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60,eq=brightness='!BRIGHT_AMP!*sin(2*PI*t/!EFX_DUR!)'"
+) else if "!ACTIVE_MOTION!"=="ZOOMROTATE" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,rotate=angle='!ROT_RAD_S!*sin(2*PI*t/!EFX_DUR!)':fillcolor=black:ow=iw:oh=ih,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE_ZR!':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+) else if "!ACTIVE_MOTION!"=="VERTWAVE" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2':'(ih-oh)/2+sin(2*PI*t/!EFX_DUR!)*!WAVE_AMP_S!',fps=60"
+) else if "!ACTIVE_MOTION!"=="FIGURE8" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2+sin(4*PI*t/!EFX_DUR!)*!WAVE_AMP_S!':'(ih-oh)/2+sin(2*PI*t/!EFX_DUR!)*!PAN_AMP_S!',fps=60"
+) else if "!ACTIVE_MOTION!"=="DIAGONAL" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2+sin(2*PI*t/!EFX_DUR!)*!WAVE_AMP_S!':'(ih-oh)/2+sin(2*PI*t/!EFX_DUR!)*!PAN_AMP_S!',fps=60"
+) else if "!ACTIVE_MOTION!"=="GENTLEROT" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,rotate=angle='!ROT_RAD_S!*sin(2*PI*t/!EFX_DUR!)':fillcolor=black:ow=iw:oh=ih,crop=!VID_W!:!VID_H!,fps=60"
+) else if "!ACTIVE_MOTION!"=="TRIPLEPULSE" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*(1-cos(6*PI*on/!TOTAL_FRAMES!))/2':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+) else if "!ACTIVE_MOTION!"=="ZOOMSWAY" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE!':x='iw/2-(iw/zoom/2)+sin(2*PI*on/!TOTAL_FRAMES!)*(!WAVE_AMP_S!/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+) else if "!ACTIVE_MOTION!"=="ORBIT2X" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2+sin(4*PI*t/!EFX_DUR!)*(!WAVE_AMP_S!/2)':'(ih-oh)/2+cos(4*PI*t/!EFX_DUR!)*(!PAN_AMP_S!/2)',fps=60"
+) else if "!ACTIVE_MOTION!"=="VIBRATE" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2+sin(8*PI*t/!EFX_DUR!)*(!WAVE_AMP_S!/5)':'(ih-oh)/2+cos(8*PI*t/!EFX_DUR!)*(!PAN_AMP_S!/5)',fps=60"
+) else if "!ACTIVE_MOTION!"=="PENDULUM" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2+sin(2*PI*t/!EFX_DUR!)*!WAVE_AMP_S!':'(ih-oh)/2+cos(4*PI*t/!EFX_DUR!)*(!PAN_AMP_S!/3)',fps=60"
+) else if "!ACTIVE_MOTION!"=="BREATHSWAY" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE!':x='iw/2-(iw/zoom/2)+sin(4*PI*on/!TOTAL_FRAMES!)*(!WAVE_AMP_S!/3)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+) else if "!ACTIVE_MOTION!"=="HEARTBEAT" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE_ZR!':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60,eq=brightness='!BRIGHT_AMP!*sin(4*PI*t/!EFX_DUR!)*sin(4*PI*t/!EFX_DUR!)'"
+) else if "!ACTIVE_MOTION!"=="KENBURNS" (
+    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE!':x='iw/2-(iw/zoom/2)+sin(2*PI*on/!TOTAL_FRAMES!)*(!WAVE_AMP_S!/3)':y='ih/2-(ih/zoom/2)+sin(2*PI*on/!TOTAL_FRAMES!)*(!PAN_AMP_S!/3)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+) else (
+    set "MOTION_FILTER=scale=!VID_W!:!VID_H!:force_original_aspect_ratio=decrease,pad=!VID_W!:!VID_H!:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=60"
+)
+
+echo      Membangun Base Video...
+set "BASE_VID=tempvideo\\base_!LOOP_NUM!.mp4"
+
+REM --- Set x264 params berdasarkan kondisi RAM ---
+set "X264_EXTRA="
+set "FFMPEG_THREADS=-threads 0"
+if "!LOW_RAM_FLAG!"=="1" (
+    set "X264_EXTRA=-x264-params ref=1:bframes=0:no-cabac=1"
+    set "FFMPEG_THREADS=-threads 2"
+)
+
+:PHASE1_TRY
+ffmpeg -y -loop 1 -framerate 60 !FFMPEG_THREADS! -i "!CURR_IMG!" -i "!CURR_EFX!" -filter_complex "[0:v]!MOTION_FILTER![bg];[1:v]scale=!VID_W!:!VID_H!,format=gbrpf32le[fx];[bg]format=gbrpf32le[bg_fmt];[bg_fmt][fx]blend=all_mode=screen[out]" -map "[out]" -t !EFX_DUR! -c:v libx264 -preset !VID_PRESET! !X264_EXTRA! -pix_fmt yuv420p -an "!BASE_VID!" -loglevel warning
+if %errorlevel% equ 0 goto PHASE1_OK
+
+REM --- Gagal: coba ultra hemat RAM ---
+if "!LOW_RAM_FLAG!"=="0" (
+    echo      [WARN] Phase 1 gagal, aktifkan mode hemat RAM dan coba lagi...
+    set "LOW_RAM_FLAG=1"
+    set "X264_EXTRA=-x264-params ref=1:bframes=0:no-cabac=1"
+    set "FFMPEG_THREADS=-threads 2"
+    set "VID_PRESET_ORIG=!VID_PRESET!"
+    set "VID_PRESET=fast"
+    if exist "!BASE_VID!" del "!BASE_VID!"
+    goto PHASE1_TRY
+)
+
+REM --- Masih gagal: fallback ke FHD jika sekarang 4K ---
+if "!VID_W!"=="3840" (
+    echo      [WARN] 4K gagal karena RAM tidak cukup. Fallback otomatis ke FHD ^(1920x1080^)...
+    set "VID_W=1920"
+    set "VID_H=1080"
+    set "VID_PRESET=fast"
+    set /a "ZOOM_W=VID_W+200"
+    set /a "ZOOM_H=VID_H+200"
+    if exist "!BASE_VID!" del "!BASE_VID!"
+    call :REBUILD_MOTION_FHD
+    goto PHASE1_TRY
+)
+
+echo  [ERROR] Phase 1 gagal^^!
+goto NEXT_LOOP
+
+:PHASE1_OK
+
+REM --- E: UNIFIED PREFIX LOGIC (THUMBNAIL & INTRO) ---
+
+set "OUTPUT_FILE=outputvideofinal\\Mix_!LOOP_NUM!_!_SET_DT!.mp4"
+
+REM --- Validasi File Audio ---
+if not exist "!_AUDIO_FILE!" ( echo  [ERROR] File audio tidak ada: !_AUDIO_FILE! & goto NEXT_LOOP )
+set "_AUDIO_DUR_RAW="
+for /f "usebackq tokens=* delims=" %%D in (\`ffprobe -v error -show_entries format^=duration -of default^=noprint_wrappers^=1:nokey^=1 "!_AUDIO_FILE!" 2^>nul\`) do set "_AUDIO_DUR_RAW=%%D"
+if not defined _AUDIO_DUR_RAW ( echo  [ERROR] Audio rusak/tidak terdeteksi. & goto NEXT_LOOP )
+
+set "CONCAT_LIST=tempvideo\\concat_!LOOP_NUM!.txt"
+if exist "!CONCAT_LIST!" del "!CONCAT_LIST!"
+
+set "_PREFIX_DUR=0"
+set "HAS_PREFIX=0"
+set "THUMB_VID="
+
+REM --- 1. PROSES AUTO THUMBNAIL ---
+if not "!MODE_THUMBNAIL!"=="NONE" (
+    set "HAS_PREFIX=1"
+    set "THUMB_DUR=3"
+    set "THUMB_VID=tempvideo\\thumb_!LOOP_NUM!.mp4"
+    echo.
+    echo      -- Membangun Auto Thumbnail ^(!THUMB_DUR! detik statis^)...
+    if "!MODE_THUMBNAIL!"=="POLOS" (
+        ffmpeg -y -loop 1 -framerate 60 !FFMPEG_THREADS! -i "!CURR_IMG!" -vf "scale=!VID_W!:!VID_H!:force_original_aspect_ratio=decrease,pad=!VID_W!:!VID_H!:(ow-iw)/2:(oh-ih)/2:black,setsar=1" -t !THUMB_DUR! -c:v libx264 -preset !VID_PRESET! !X264_EXTRA! -pix_fmt yuv420p -an "!THUMB_VID!" -loglevel warning
+    ) else (
+        set "CURR_THUMB_EFX=!CURR_EFX!"
+        if !THUMB_EFX_COUNT! gtr 0 (
+            set /a "_THUMB_LIST_IDX = THUMB_ROTASI_IDX %% THUMB_EFX_COUNT"
+            for %%I in (!_THUMB_LIST_IDX!) do set "REAL_THUMB_IDX=!THUMB_EFX_LIST[%%I]!"
+            for /l %%N in (0,1,!EFX_MAX!) do (
+                if %%N==!REAL_THUMB_IDX! set "CURR_THUMB_EFX=!EFX_ARR[%%N]!"
+            )
+            set /a "THUMB_ROTASI_IDX+=1"
+        )
+        echo      Menggunakan Efek Thumbnail: !CURR_THUMB_EFX!
+        set "STATIC_FLT=scale=!VID_W!:!VID_H!:force_original_aspect_ratio=decrease,pad=!VID_W!:!VID_H!:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=60"
+        ffmpeg -y -loop 1 -framerate 60 !FFMPEG_THREADS! -i "!CURR_IMG!" -i "!CURR_THUMB_EFX!" -filter_complex "[0:v]!STATIC_FLT![bg];[1:v]scale=!VID_W!:!VID_H!,format=gbrpf32le[fx];[bg]format=gbrpf32le[bg_fmt];[bg_fmt][fx]blend=all_mode=screen[out]" -map "[out]" -t !THUMB_DUR! -c:v libx264 -preset !VID_PRESET! !X264_EXTRA! -pix_fmt yuv420p -an "!THUMB_VID!" -loglevel warning
+    )
+
+    set /a "_PREFIX_DUR+=!THUMB_DUR!"
+    set "_ABS_THUMB=%CD%\\!THUMB_VID!"
+    set "_ABS_THUMB=!_ABS_THUMB:\\=/!"
+    echo file '!_ABS_THUMB!' >> "!CONCAT_LIST!"
+)
+
+REM --- 2. PROSES INTRO VIDEO ---
+if not "!MODE_INTRO!"=="NONE" (
+    if "!MODE_INTRO!"=="RANDOM" (
+        set /a "CURR_INTRO_IDX=!RANDOM! %% (INTRO_MAX+1)"
+        for /l %%N in (0,1,!INTRO_MAX!) do ( if %%N==!CURR_INTRO_IDX! set "CURR_INTRO=!INTRO_ARR[%%N]!" )
+    ) else (
+        set "CURR_INTRO=!INTRO_ARR[%INTRO_STATIS_IDX%]!"
+    )
+
+    if exist "!CURR_INTRO!" (
+        set "HAS_PREFIX=1"
+        echo.
+        echo      -- Memproses Video Intro --
+        for %%I in ("!CURR_INTRO!") do set "_INTRO_BASENAME=%%~nxI"
+        echo      Menggunakan Intro: !_INTRO_BASENAME!
+
+        set "_INTRO_SAFE_NAME=!_INTRO_BASENAME: =_!"
+        set "_INTRO_VID=intro_cache\\intro_enc_!VID_W!x!VID_H!_!_INTRO_SAFE_NAME!.mp4"
+
+        if exist "!_INTRO_VID!" (
+            echo      [CACHE] Memuat intro dari penyimpanan cache
+        ) else (
+            echo      [ENCODE] Menyesuaikan resolusi dan framerate Intro...
+            ffmpeg -y -i "!CURR_INTRO!" -vf "scale=!VID_W!:!VID_H!:force_original_aspect_ratio=decrease,pad=!VID_W!:!VID_H!:(ow-iw)/2:(oh-ih)/2:black,setsar=1" -r 60 -c:v libx264 -preset !VID_PRESET! !X264_EXTRA! -pix_fmt yuv420p -an "!_INTRO_VID!" -loglevel warning
+        )
+
+        set "_INTRO_DUR_RAW="
+        for /f "usebackq tokens=* delims=" %%D in (\`ffprobe -v error -show_entries format^=duration -of default^=noprint_wrappers^=1:nokey^=1 "!_INTRO_VID!" 2^>nul\`) do set "_INTRO_DUR_RAW=%%D"
+
+        for /f "usebackq delims=" %%X in (\`powershell -NoProfile -Command "[math]::Round([double]::Parse('!_PREFIX_DUR!', [System.Globalization.CultureInfo]::InvariantCulture) + [double]::Parse('!_INTRO_DUR_RAW!', [System.Globalization.CultureInfo]::InvariantCulture), 2).ToString([System.Globalization.CultureInfo]::InvariantCulture)"\`) do set "_PREFIX_DUR=%%X"
+
+        set "_ABS_INTRO=%CD%\\!_INTRO_VID!"
+        set "_ABS_INTRO=!_ABS_INTRO:\\=/!"
+        echo file '!_ABS_INTRO!' >> "!CONCAT_LIST!"
+    ) else (
+        echo      [ERROR] File intro tidak valid! Diabaikan.
+    )
+)
+
+set "_MUX_EXIT=-1"
+
+REM --- 3. MUXING ---
+if "!HAS_PREFIX!"=="1" (
+    set "_NEED_BASE=0"
+    for /f "usebackq delims=" %%X in (\`powershell -NoProfile -Command "$a = [double]::Parse('!_AUDIO_DUR_RAW!', [System.Globalization.CultureInfo]::InvariantCulture); $p = [double]::Parse('!_PREFIX_DUR!', [System.Globalization.CultureInfo]::InvariantCulture); if ($a -gt $p) { '1' } else { '0' }"\`) do set "_NEED_BASE=%%X"
+
+    if "!_NEED_BASE!"=="1" (
+        for /f "usebackq delims=" %%X in (\`powershell -NoProfile -Command "$a = [double]::Parse('!_AUDIO_DUR_RAW!', [System.Globalization.CultureInfo]::InvariantCulture); $p = [double]::Parse('!_PREFIX_DUR!', [System.Globalization.CultureInfo]::InvariantCulture); [math]::Round($a - $p, 2).ToString([System.Globalization.CultureInfo]::InvariantCulture)"\`) do set "_BASE_NEEDED=%%X"
+
+        echo      Me-looping Base Video untuk sisa durasi lagu ^(!_BASE_NEEDED! detik^)...
+        set "_BASE_LONG=tempvideo\\base_long_!LOOP_NUM!.mp4"
+        ffmpeg -y -stream_loop -1 -i "!BASE_VID!" -t !_BASE_NEEDED! -c:v copy "!_BASE_LONG!" -loglevel warning
+
+        set "_ABS_BASE=%CD%\\!_BASE_LONG!"
+        set "_ABS_BASE=!_ABS_BASE:\\=/!"
+        echo file '!_ABS_BASE!' >> "!CONCAT_LIST!"
+    ) else (
+        echo      [WARN] Lagu sangat pendek, hanya Thumbnail/Intro saja yang muncul.
+    )
+
+    echo      Menyatukan ^(Muxing^) Prefix + Base Video + Audio...
+    ffmpeg -y -f concat -safe 0 -i "!CONCAT_LIST!" -i "!_AUDIO_FILE!" -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy -shortest -avoid_negative_ts make_zero -movflags +faststart "!OUTPUT_FILE!" -loglevel warning
+    set "_MUX_EXIT=!errorlevel!"
+
+) else (
+    echo.
+    echo      -- Phase 2: Muxing Audio + Video ^(stream copy^) --
+    ffmpeg -y -stream_loop -1 -i "!BASE_VID!" -i "!_AUDIO_FILE!" -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy -shortest -avoid_negative_ts make_zero -movflags +faststart "!OUTPUT_FILE!" -loglevel warning
+    set "_MUX_EXIT=!errorlevel!"
+
+    if !_MUX_EXIT! neq 0 (
+        echo      [WARN] Mux utama gagal. Mencoba mode fallback...
+        ffmpeg -y -stream_loop -1 -i "!BASE_VID!" -i "!_AUDIO_FILE!" -c:v copy -c:a copy -shortest -movflags +faststart "!OUTPUT_FILE!" -loglevel warning
+        set "_MUX_EXIT=!errorlevel!"
+    )
+)
+
+REM --- Evaluasi Akhir ---
+if !_MUX_EXIT! equ 0 (
+    if exist "!OUTPUT_FILE!" (
+        set /a SUCCESS_COUNT+=1
+        echo      [OK] Selesai: !OUTPUT_FILE!
+    ) else (
+        echo  [ERROR] Muxing gagal total.
+    )
+) else (
+    echo  [ERROR] Muxing gagal total ^(exit !_MUX_EXIT!^).
+    if exist "!OUTPUT_FILE!" del "!OUTPUT_FILE!"
+)
+
+REM --- F: FINALISASI & CLEANUP SEMENTARA ---
+for %%X in ("!CURR_IMG!") do set "_IMG_NAME=%%~nxX"
+if exist "!CURR_IMG!" move /y "!CURR_IMG!" "gambarterpakai\\!_IMG_NAME!" >nul 2>&1
+
+if exist "!BASE_VID!" del "!BASE_VID!"
+if exist "!THUMB_VID!" del "!THUMB_VID!"
+if exist "tempvideo\\base_long_!LOOP_NUM!.mp4" del "tempvideo\\base_long_!LOOP_NUM!.mp4"
+if exist "!CONCAT_LIST!" del "!CONCAT_LIST!"
+if exist "tempmerged\\audio_temp.mp3" del "tempmerged\\audio_temp.mp3"
+if exist "tempmerged\\audio_temp.aac" del "tempmerged\\audio_temp.aac"
+
+:NEXT_LOOP
+goto MAIN_LOOP
+
+:RENDER_SELESAI
+echo.
+echo  -----------------------------------------------
+echo   SEMUA VIDEO SELESAI DI-RENDER^^!
+echo  -----------------------------------------------
+2>nul rd /s /q "tempmerged" 2>nul
+2>nul rd /s /q "tempvideo"  2>nul
+if exist "%TEMP%\\mvc_mp3_database.txt" del "%TEMP%\\mvc_mp3_database.txt"
+
+echo   Total berhasil : !SUCCESS_COUNT! dari !JUMLAH_OUTPUT! video
+echo   Output folder  : %CD%\\outputvideofinal\\
+echo.
+pause
+endlocal
+
+REM ============================================================
+REM  SUBROUTINE: Rebuild MOTION_FILTER setelah fallback ke FHD
+REM ============================================================
+:REBUILD_MOTION_FHD
+if "!ACTIVE_MOTION!"=="ZOOMIN"     set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE!':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+if "!ACTIVE_MOTION!"=="ZOOMOUT"    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='(1.0+!ZOOM_MULT!)-!ZOOM_MULT!*!ZP_SHAPE!':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+if "!ACTIVE_MOTION!"=="WAVE"       set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2+sin(2*PI*t/!EFX_DUR!)*!WAVE_AMP_S!':'(ih-oh)/2',fps=60"
+if "!ACTIVE_MOTION!"=="SINEPAN"    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2+sin(2*PI*t/!EFX_DUR!)*!WAVE_AMP_S!':'(ih-oh)/2+cos(2*PI*t/!EFX_DUR!)*!PAN_AMP_S!',fps=60"
+if "!ACTIVE_MOTION!"=="BREATHING"  set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE!':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+if "!ACTIVE_MOTION!"=="SOFTBUMP"   set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE!':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60,eq=brightness='!BRIGHT_AMP!*sin(2*PI*t/!EFX_DUR!)'"
+if "!ACTIVE_MOTION!"=="ZOOMROTATE" set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,rotate=angle='!ROT_RAD_S!*sin(2*PI*t/!EFX_DUR!)':fillcolor=black:ow=iw:oh=ih,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE_ZR!':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+if "!ACTIVE_MOTION!"=="STATIC"      set "MOTION_FILTER=scale=!VID_W!:!VID_H!:force_original_aspect_ratio=decrease,pad=!VID_W!:!VID_H!:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=60"
+if "!ACTIVE_MOTION!"=="VERTWAVE"    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2':'(ih-oh)/2+sin(2*PI*t/!EFX_DUR!)*!WAVE_AMP_S!',fps=60"
+if "!ACTIVE_MOTION!"=="FIGURE8"     set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2+sin(4*PI*t/!EFX_DUR!)*!WAVE_AMP_S!':'(ih-oh)/2+sin(2*PI*t/!EFX_DUR!)*!PAN_AMP_S!',fps=60"
+if "!ACTIVE_MOTION!"=="DIAGONAL"    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2+sin(2*PI*t/!EFX_DUR!)*!WAVE_AMP_S!':'(ih-oh)/2+sin(2*PI*t/!EFX_DUR!)*!PAN_AMP_S!',fps=60"
+if "!ACTIVE_MOTION!"=="GENTLEROT"   set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,rotate=angle='!ROT_RAD_S!*sin(2*PI*t/!EFX_DUR!)':fillcolor=black:ow=iw:oh=ih,crop=!VID_W!:!VID_H!,fps=60"
+if "!ACTIVE_MOTION!"=="TRIPLEPULSE" set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*(1-cos(6*PI*on/!TOTAL_FRAMES!))/2':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+if "!ACTIVE_MOTION!"=="ZOOMSWAY"    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE!':x='iw/2-(iw/zoom/2)+sin(2*PI*on/!TOTAL_FRAMES!)*(!WAVE_AMP_S!/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+if "!ACTIVE_MOTION!"=="ORBIT2X"     set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2+sin(4*PI*t/!EFX_DUR!)*(!WAVE_AMP_S!/2)':'(ih-oh)/2+cos(4*PI*t/!EFX_DUR!)*(!PAN_AMP_S!/2)',fps=60"
+if "!ACTIVE_MOTION!"=="VIBRATE"     set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2+sin(8*PI*t/!EFX_DUR!)*(!WAVE_AMP_S!/5)':'(ih-oh)/2+cos(8*PI*t/!EFX_DUR!)*(!PAN_AMP_S!/5)',fps=60"
+if "!ACTIVE_MOTION!"=="PENDULUM"    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!:'(iw-ow)/2+sin(2*PI*t/!EFX_DUR!)*!WAVE_AMP_S!':'(ih-oh)/2+cos(4*PI*t/!EFX_DUR!)*(!PAN_AMP_S!/3)',fps=60"
+if "!ACTIVE_MOTION!"=="BREATHSWAY"  set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE!':x='iw/2-(iw/zoom/2)+sin(4*PI*on/!TOTAL_FRAMES!)*(!WAVE_AMP_S!/3)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+if "!ACTIVE_MOTION!"=="HEARTBEAT"   set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE_ZR!':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60,eq=brightness='!BRIGHT_AMP!*sin(4*PI*t/!EFX_DUR!)*sin(4*PI*t/!EFX_DUR!)'"
+if "!ACTIVE_MOTION!"=="KENBURNS"    set "MOTION_FILTER=scale=!ZOOM_W!:!ZOOM_H!:force_original_aspect_ratio=increase,crop=!VID_W!:!VID_H!,zoompan=z='1.0+!ZOOM_MULT!*!ZP_SHAPE!':x='iw/2-(iw/zoom/2)+sin(2*PI*on/!TOTAL_FRAMES!)*(!WAVE_AMP_S!/3)':y='ih/2-(ih/zoom/2)+sin(2*PI*on/!TOTAL_FRAMES!)*(!PAN_AMP_S!/3)':d=!TOTAL_FRAMES!:s=!VID_W!x!VID_H!:fps=60"
+exit /b 0
+
+REM ============================================================
+REM  SUBROUTINE: Ambil dari DB ffprobe (Mode MANUAL)
+REM ============================================================
+:WRITE_PS1_MANUAL
+echo $db    = @(Get-Content "%TEMP%\\mvc_mp3_database.txt") > "%TEMP%\\mvc_sel_manual.ps1"
+echo $cnt   = [int]"!MP3_PER_VIDEO!" >> "%TEMP%\\mvc_sel_manual.ps1"
+echo $picks = [System.Collections.Generic.List[string]]::new() >> "%TEMP%\\mvc_sel_manual.ps1"
+echo $shuffled = [System.Collections.Generic.List[string]]::new() >> "%TEMP%\\mvc_sel_manual.ps1"
+echo $shuffleIdx = $db.Count >> "%TEMP%\\mvc_sel_manual.ps1"
+echo while ($picks.Count -lt $cnt) { >> "%TEMP%\\mvc_sel_manual.ps1"
+echo     if ($shuffleIdx -ge $db.Count) { >> "%TEMP%\\mvc_sel_manual.ps1"
+echo         $shuffled = [System.Collections.Generic.List[string]]($db ^| Get-Random -Count $db.Count) >> "%TEMP%\\mvc_sel_manual.ps1"
+echo         $shuffleIdx = 0 >> "%TEMP%\\mvc_sel_manual.ps1"
+echo     } >> "%TEMP%\\mvc_sel_manual.ps1"
+echo     $picks.Add($shuffled[$shuffleIdx].Split([char]124)[1]) >> "%TEMP%\\mvc_sel_manual.ps1"
+echo     $shuffleIdx++ >> "%TEMP%\\mvc_sel_manual.ps1"
+echo } >> "%TEMP%\\mvc_sel_manual.ps1"
+echo [System.IO.File]::WriteAllLines("%TEMP%\\mvc_selected.txt", $picks, [System.Text.Encoding]::ASCII) >> "%TEMP%\\mvc_sel_manual.ps1"
+exit /b 0
+
+REM ============================================================
+REM  SUBROUTINE: Ambil dari DB ffprobe (Mode RANDOM)
+REM ============================================================
+:WRITE_PS1_RANDOM
+echo $db        = @(Get-Content "%TEMP%\\mvc_mp3_database.txt") > "%TEMP%\\mvc_sel_random.ps1"
+echo $minSec    = !RANGE_MIN_SEC! >> "%TEMP%\\mvc_sel_random.ps1"
+echo $maxSec    = !RANGE_MAX_SEC! >> "%TEMP%\\mvc_sel_random.ps1"
+echo $hardMax   = !RANGE_MAX_SEC! >> "%TEMP%\\mvc_sel_random.ps1"
+echo $targetSec = Get-Random -Minimum $minSec -Maximum ($maxSec + 1) >> "%TEMP%\\mvc_sel_random.ps1"
+echo $total     = 0 >> "%TEMP%\\mvc_sel_random.ps1"
+echo $picks     = [System.Collections.Generic.List[string]]::new() >> "%TEMP%\\mvc_sel_random.ps1"
+echo $shuffled  = [System.Collections.Generic.List[object]]::new() >> "%TEMP%\\mvc_sel_random.ps1"
+echo $shuffleIdx = $db.Count >> "%TEMP%\\mvc_sel_random.ps1"
+echo $attempts  = 0 >> "%TEMP%\\mvc_sel_random.ps1"
+echo $maxAttempts = $db.Count * 4 >> "%TEMP%\\mvc_sel_random.ps1"
+echo while ($total -lt $targetSec) { >> "%TEMP%\\mvc_sel_random.ps1"
+echo     $attempts++ >> "%TEMP%\\mvc_sel_random.ps1"
+echo     if ($attempts -gt $maxAttempts) { break } >> "%TEMP%\\mvc_sel_random.ps1"
+echo     if ($shuffleIdx -ge $db.Count) { >> "%TEMP%\\mvc_sel_random.ps1"
+echo         $shuffled = [System.Collections.Generic.List[object]]($db ^| Get-Random -Count $db.Count) >> "%TEMP%\\mvc_sel_random.ps1"
+echo         $shuffleIdx = 0 >> "%TEMP%\\mvc_sel_random.ps1"
+echo     } >> "%TEMP%\\mvc_sel_random.ps1"
+echo     $line  = $shuffled[$shuffleIdx] >> "%TEMP%\\mvc_sel_random.ps1"
+echo     $shuffleIdx++ >> "%TEMP%\\mvc_sel_random.ps1"
+echo     $parts = $line.Split([char]124) >> "%TEMP%\\mvc_sel_random.ps1"
+echo     $dur   = [int]$parts[0] >> "%TEMP%\\mvc_sel_random.ps1"
+echo     $mp3   = $parts[1] >> "%TEMP%\\mvc_sel_random.ps1"
+echo     if (($total + $dur) -gt $hardMax -and $picks.Count -gt 0) { >> "%TEMP%\\mvc_sel_random.ps1"
+echo         $sorted = $db ^| Sort-Object { [int]$_.Split([char]124)[0] } >> "%TEMP%\\mvc_sel_random.ps1"
+echo         $found  = $false >> "%TEMP%\\mvc_sel_random.ps1"
+echo         foreach ($candidate in $sorted) { >> "%TEMP%\\mvc_sel_random.ps1"
+echo             $cp = $candidate.Split([char]124) >> "%TEMP%\\mvc_sel_random.ps1"
+echo             if (($total + [int]$cp[0]) -le $hardMax) { >> "%TEMP%\\mvc_sel_random.ps1"
+echo                 $picks.Add($cp[1]); $total += [int]$cp[0]; $found = $true; break >> "%TEMP%\\mvc_sel_random.ps1"
+echo             } >> "%TEMP%\\mvc_sel_random.ps1"
+echo         } >> "%TEMP%\\mvc_sel_random.ps1"
+echo         break >> "%TEMP%\\mvc_sel_random.ps1"
+echo     } >> "%TEMP%\\mvc_sel_random.ps1"
+echo     $picks.Add($mp3) >> "%TEMP%\\mvc_sel_random.ps1"
+echo     $total += $dur >> "%TEMP%\\mvc_sel_random.ps1"
+echo } >> "%TEMP%\\mvc_sel_random.ps1"
+echo [System.IO.File]::WriteAllLines("%TEMP%\\mvc_selected.txt", $picks, [System.Text.Encoding]::ASCII) >> "%TEMP%\\mvc_sel_random.ps1"
+exit /b 0
+
+REM ============================================================
+REM  SUBROUTINE: Build Audio Crossfade
+REM ============================================================
+:BUILD_CROSSFADE
+set "PS1_XFADE=%TEMP%\\mvc_xfade.ps1"
+if exist "!PS1_XFADE!" del "!PS1_XFADE!"
+if exist "%TEMP%\\run_xfade.bat" del "%TEMP%\\run_xfade.bat"
+
+echo $files   = @(Get-Content '%TEMP%\\mvc_selected.txt') > "!PS1_XFADE!"
+echo $outFile = 'tempmerged\\audio_temp.aac' >> "!PS1_XFADE!"
+echo $n       = $files.Count >> "!PS1_XFADE!"
+echo. >> "!PS1_XFADE!"
+echo if ($n -lt 2) { >> "!PS1_XFADE!"
+echo     $f0  = $files[0] >> "!PS1_XFADE!"
+echo     $cmd = "ffmpeg -y -i " + [char]34 + $f0 + [char]34 + " -c:a aac -b:a 192k " + [char]34 + $outFile + [char]34 + " -loglevel warning" >> "!PS1_XFADE!"
+echo     $cmd ^| Out-File -FilePath '%TEMP%\\run_xfade.bat' -Encoding ASCII >> "!PS1_XFADE!"
+echo     exit >> "!PS1_XFADE!"
+echo } >> "!PS1_XFADE!"
+echo. >> "!PS1_XFADE!"
+echo $inputs = ($files ^| ForEach-Object { "-i " + [char]34 + $_ + [char]34 }) -join ' ' >> "!PS1_XFADE!"
+echo $parts  = [System.Collections.Generic.List[string]]::new() >> "!PS1_XFADE!"
+echo $last   = $n - 1 >> "!PS1_XFADE!"
+echo. >> "!PS1_XFADE!"
+echo for ($i = 1; $i -lt $n; $i++) { >> "!PS1_XFADE!"
+echo     $prev = $i - 1 >> "!PS1_XFADE!"
+echo     $in1  = '[0:a]' >> "!PS1_XFADE!"
+echo     if ($i -gt 1) { $in1 = '[a' + $prev + ']' } >> "!PS1_XFADE!"
+echo     $in2  = '[' + $i + ':a]' >> "!PS1_XFADE!"
+echo     $out  = '[a' + $i + ']' >> "!PS1_XFADE!"
+echo     if ($i -eq $last) { $out = '[aout]' } >> "!PS1_XFADE!"
+echo     $parts.Add($in1 + $in2 + ' acrossfade=d=4:c1=tri:c2=tri ' + $out) >> "!PS1_XFADE!"
+echo } >> "!PS1_XFADE!"
+echo. >> "!PS1_XFADE!"
+echo $fc  = ($parts -join ';').Trim(';').Trim() >> "!PS1_XFADE!"
+echo $cmd = "ffmpeg -y $inputs -filter_complex " + [char]34 + $fc + [char]34 + " -map " + [char]34 + "[aout]" + [char]34 + " -c:a aac -b:a 192k " + [char]34 + $outFile + [char]34 + " -loglevel warning" >> "!PS1_XFADE!"
+echo $cmd ^| Out-File -FilePath '%TEMP%\\run_xfade.bat' -Encoding ASCII >> "!PS1_XFADE!"
+
+powershell -ExecutionPolicy Bypass -NoProfile -File "!PS1_XFADE!" >nul 2>&1
+call "%TEMP%\\run_xfade.bat"
+
+if %errorlevel% neq 0 (
+    echo      [WARN] Proses Crossfade gagal, kembali ke penggabungan Normal...
+    goto FALLBACK_NORMAL
+)
+exit /b 0
+`;
+
+// ============================================================
+// MAIN GENERATE FUNCTION
+// ============================================================
+function generateBat(){
+  // Re-sync state
+  updateSummary();
+  state.rootPath = document.getElementById('rootPath').value.trim();
+
+  // Validate
+  const errEl = document.getElementById('err-folder');
+  if(!state.rootPath){
+    errEl.classList.add('show');
+    document.getElementById('sec-folder').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  errEl.classList.remove('show');
+
+  // Assemble
+  const partA = getBatPartA(state.rootPath);
+  const configBlock = buildConfigBlock();
+  const full = partA + configBlock + BAT_PART_B;
+
+  // Download
+  const blob = new Blob([full], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  // Name file based on key settings
+  const nm = state.rootPath.split('\\').pop() || 'project';
+  a.download = `mvc_${nm}_${state.vidW}x${state.vidH}_${state.modeMotion}_${state.modeEfek}.bat`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.onload = function(){
+  calcRange();
+  updateSummary();
+};
+</script>
+
+</body>
+</html>
